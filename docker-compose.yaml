@@ -1,0 +1,15 @@
+version: '3'
+
+services:
+  vector:
+    image: timberio/vector:0.27.0-debian
+    volumes:
+      - ./Vector:/etc/vector/
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+
+networks:
+  default:
+    external:
+      name: thatcherthornberry

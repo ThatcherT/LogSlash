@@ -1,0 +1,36 @@
+[sources.generate_syslog]
+type = "demo_logs"
+format = "syslog"
+count = 5
+
+[transforms.remap_syslog]
+inputs = [ "generate_syslog"]
+type = "remap"
+source = '''
+  structured = parse_syslog!(.message)
+  .event = "syslog"
+  .source = "hello-from-vector"
+  .souretype = "typeaway"
+  . = merge(., structured)
+'''
+
+[sinks.emit_syslog]
+inputs = ["remap_syslog"]
+type = "console"
+encoding.codec = "json"
+
+[sinks.splunk]
+type = "splunk_hec_logs"
+inputs = [ "remap_syslog" ]
+endpoint = "https://prd-p-voxn4.splunkcloud.com:8088/services/collector/event"
+
+#endpoint = "https://http-inputs-hec.splunkcloud.com"
+host_key = "prd-p-voxn4"
+default_token = "bc9681db-59fd-445c-9c43-b21e5f23b540"
+compression = "none"
+  [sinks.splunk.encoding]
+  codec = "json"
+  [sinks.splunk.batch]
+    max_events = 1
+  [sinks.splunk.tls]
+    verify_certificate = false
