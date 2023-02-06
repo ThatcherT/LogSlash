@@ -6,9 +6,16 @@
 [sources.in]
 # Define your source here. https://vector.dev/docs/reference/configuration/sources/
 type = "file"
-include = [ "files.log" ]
+include = [ "/var/log/slash/test.log" ]
 read_from = "beginning"
 ignore_checkpoints = true
+
+# console output
+[sinks.pipe0]
+type = "console"
+inputs=["pipe3"]
+  [sinks.pipe0.encoding]
+  codec="json"
 
 [transforms.pipe1]
 type = "remap"
@@ -16,12 +23,13 @@ inputs = ["in"]
 source = '''
 # Parsing for JSON Logs
         . = parse_json!(.message)
+        
 # Cleaning up messages
         del(.message)
         .tx_hosts = ."tx_hosts"
         .rx_hosts = ."rx_hosts"
 # Converting start from epoch to timestamp
-        .timestamp = to_timestamp!(.ts)
+        .timestamp = to_timestamp!(.timestamp)
         .timestamp_end = .timestamp
 # Setting our LogSlash timewindow to every minute on the minute based on the timestamp
         .timewindow, err = format_timestamp(.timestamp, format: "%F%R")
@@ -31,22 +39,14 @@ source = '''
         del(.ts)
 '''
 
-[transforms.pipe2]
-# Filtering out empty logs
-type = "filter"
-inputs = ["pipe1"]
-condition.type = "vrl"
-condition.source =  """
-        .fuid != null
-"""
 
 [transforms.pipe3]
 type = "reduce"
-inputs = ["pipe2"]
+inputs = ["pipe1"]
 # Hold events in memory for 1 minute before moving to the next pipe.
 # This setting is for streaming inputs. If you are running logslash on a flat
 # file, this setting will delay the output by 1 minute.
-expire_after_ms = 60000
+# expire_after_ms = 60000
 # Defining the fields to deduplicate by, "timewindow" is required for LogSlash to function
 group_by = [ "timewindow", "tx_hosts", "rx_hosts", "source"]
 
@@ -75,8 +75,8 @@ source = '''
         del(.timewindow)
 '''
 
-[sinks.out]
-# Define your output here. https://vector.dev/docs/reference/configuration/sinks/
+[sinks.log_file]
 inputs = ["pipe4"]
-type = "console"
+type = "file"
+path = "/var/log/slash/test-slashed.log"
 encoding.codec = "json"

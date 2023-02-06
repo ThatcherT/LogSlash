@@ -1,0 +1,1 @@
+{"appname":"Karimmove","event":"syslog","facility":"authpriv","hostname":"names.org","message":"Great Scott! We're never gonna reach 88 mph with the flux capacitor in its current state!","msgid":"ID944","procid":4076,"severity":"warning","source":"hello-from-vector","source_type":"demo_logs","souretype":"typeaway","timestamp":"2023-02-06T02:29:12.135Z","version":1}

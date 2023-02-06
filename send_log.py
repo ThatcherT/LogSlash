@@ -1,28 +1,28 @@
-# http://http-inputs.prd-p-owj2m.splunkcloud.com:8088/services/collector/event
 import requests
 
-host = "prd-p-owj2m"
-# host='si-i-03ac3c083b74377d2.prd-p-owj2m'
-# host= 'http-inputs-' + host
+# read .log file
+log_data = []
+with open("./Vector/logs/test.log", "r") as f:
+    # each log is separated in a new line
+    # append each log to a list
+    log_data = ''.join([line.strip() for line in f.readlines()])
+
+
+
+host = "prd-p-voxn4"
 
 protocol = "https"
 port = 8088
-# port=443
 endpoint = "services/collector/raw"
 # endpoint = 'services/collector/raw'
-# url = f"{protocol}://{host}.splunkcloud.com:{port}/{endpoint}"
-url = f"http://localhost:8000/article/init"
+url = f"{protocol}://{host}.splunkcloud.com:{port}/{endpoint}"
 
-token = "a9a2a282-c294-4187-a3d2-14377065f449"
+token = "bc9681db-59fd-445c-9c43-b21e5f23b540"
 headers = {"Authorization": f"Splunk {token}"}
 
-data = {"host": "localhost", "source": "test", "sourcetype": "test", "event": "test"}
-
-for i in range(2):
-    r = requests.post(
-        url,
-        headers=headers,
-        json=data,
-        verify=False,
-    )
-print(r)
+r = requests.post(
+    url,
+    headers=headers,
+    json=log_data,
+    verify=False,
+)
