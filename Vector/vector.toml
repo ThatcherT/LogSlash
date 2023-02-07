@@ -1,0 +1,21 @@
+[sources.generate_syslog]
+type = "demo_logs"
+format = "syslog"
+count = 5000
+
+[transforms.remap_syslog]
+inputs = [ "generate_syslog"]
+type = "remap"
+source = '''
+  structured = parse_syslog!(.message)
+  .event = "syslog"
+  .source = "hello-from-vector"
+  .souretype = "typeaway"
+  . = merge(., structured)
+'''
+
+[sinks.log_file]
+inputs = ["remap_syslog"]
+type = "file"
+path = "./logs/test.log"
+encoding.codec = "json"
